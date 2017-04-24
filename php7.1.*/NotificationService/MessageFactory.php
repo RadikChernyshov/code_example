@@ -43,6 +43,13 @@ final class MessageFactory
     }
 
     /**
+     *
+     */
+    protected function __clone()
+    {
+    }
+
+    /**
      * @param Event $event
      * @param ContainerInterface $container
      *
@@ -184,12 +191,5 @@ final class MessageFactory
         $message->setEvent($event);
         $message->setContainer($container);
         return $message;
-    }
-
-    /**
-     *
-     */
-    protected function __clone()
-    {
     }
 }
