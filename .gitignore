@@ -36,6 +36,8 @@ Temporary Items
 .idea/dictionaries
 
 # Sensitive or high-churn files:
+.idea
+.idea/*
 .idea/**/dataSources/
 .idea/**/dataSources.ids
 .idea/**/dataSources.xml
