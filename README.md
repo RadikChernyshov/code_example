@@ -60,3 +60,44 @@
     ├── CampaignPropertiesRepository.php
     └── CampaignRepository.php
 ```
+
+#### Refactoring Issue
+
+```
+├── README.md
+├── bootstrap.php
+├── cache
+│   ├── flash
+│   └── portal
+├── composer.json
+├── composer.lock
+└── src
+    ├── ApiCall.php
+    ├── Applets
+    │   ├── Applet.php
+    │   └── Applets.php
+    ├── Applications
+    │   ├── Application.php
+    │   └── Applications.php
+    ├── Config.php
+    ├── Exceptions
+    │   ├── FileNotFoundException.php
+    │   └── UndefinedException.php
+    ├── Generators
+    │   └── FileGenerator.php
+    ├── Interfaces
+    │   ├── AppletInterface.php
+    │   ├── AppletsInterface.php
+    │   ├── ApplicationInterface.php
+    │   ├── ApplicationLanguageInterface.php
+    │   ├── ApplicationsInterface.php
+    │   ├── FileGeneratorInterface.php
+    │   ├── LanguageBatchInterface.php
+    │   └── LanguageFileInterface.php
+    ├── LanguageBatchBo.php
+    ├── LanguageFiles
+    │   ├── AppletLanguageFile.php
+    │   └── ApplicationLanguageFile.php
+    └── generate_language_files.php
+
+```
