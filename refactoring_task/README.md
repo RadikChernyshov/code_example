@@ -11,7 +11,6 @@ The goals are:
 * The ApiCall, and Config classes are simplified versions of the original ones, they can not be changed
 * The exceptions can be changed
 * The console output of can be changed
-* Only PHPUnit can be used for testing
 * Commenting is not necessary
 * You can clone this repo, but the homework should be sent to us through email (with the git files)
 
