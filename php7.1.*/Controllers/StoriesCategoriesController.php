@@ -30,10 +30,10 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 final class StoriesCategoriesController extends FOSRestController
 {
-    use RequestControllerTrait,
-        ResponseControllerTrait,
-        RepositoryControllerTrait,
-        FindEntityControllerTrait;
+    use RequestControllerTrait;
+    use ResponseControllerTrait;
+    use RepositoryControllerTrait;
+    use FindEntityControllerTrait;
 
     /**
      * GET /stories-categories
@@ -76,8 +76,9 @@ final class StoriesCategoriesController extends FOSRestController
         $storyForm->submit($this->getPost($this->getRequest()));
         if ($storyForm->isValid()) {
             $storyEntity = $this->findEntity(StoryCategory::class, $categoryId);
-            $response = $this->getJsonResponse($this->getRepository(StoryCategory::class)
-                ->update($storyEntity, $storyForm));
+            $response = $this->getJsonResponseCreated(
+                $this->getRepository(StoryCategory::class)->update($storyEntity, $storyForm)
+            );
         } else {
             $response = $this->getJsonResponse($this->getFormErrorsResponse($storyForm), HttpStatus::BAD_REQUEST);
         }
@@ -97,8 +98,7 @@ final class StoriesCategoriesController extends FOSRestController
         $storyForm = $this->createForm(StoryCategoryType::class);
         $storyForm->submit($this->getPost($this->getRequest()));
         if ($storyForm->isValid()) {
-            $response = $this->getJsonResponse($this->getRepository(StoryCategory::class)
-                ->create($storyForm));
+            $response = $this->getJsonResponseCreated($this->getRepository(StoryCategory::class)->create($storyForm));
         } else {
             $response = $this->getJsonResponse($this->getFormErrorsResponse($storyForm), HttpStatus::BAD_REQUEST);
         }
@@ -116,6 +116,6 @@ final class StoriesCategoriesController extends FOSRestController
     public function deleteCategoryAction(int $categoryId): JsonResponse
     {
         $this->getRepository(StoryCategory::class)->delete($this->findEntity(Story::class, $categoryId));
-        return $this->getJsonResponse([]);
+        return $this->getJsonResponseEmpty();
     }
 }

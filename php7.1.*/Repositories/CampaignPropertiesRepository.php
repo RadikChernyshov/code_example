@@ -153,7 +153,7 @@ final class CampaignPropertiesRepository extends EntityRepository
     {
         $result = false;
         if (0 < count($campaignsIds)) {
-            $result = $this->getQueryBuilder()->update(CampaignProperties::class, 'cp')
+            $result = (bool)$this->getQueryBuilder()->update(CampaignProperties::class, 'cp')
                 ->set('cp.status_id', $campaignStatusEntity->getId())
                 ->where('cp.campaign_id IN (:campaignsIds)')
                 ->setParameter('campaignsIds', $campaignsIds)

@@ -36,22 +36,22 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 final class LeadsController extends FOSRestController
 {
-    use RequestControllerTrait,
-        ResponseControllerTrait,
-        RepositoryControllerTrait,
-        FindDocumentControllerTrait,
-        FindEntityControllerTrait,
-        DocumentControllerTrait,
-        EventControllerTrait;
+    use RequestControllerTrait;
+    use ResponseControllerTrait;
+    use RepositoryControllerTrait;
+    use FindDocumentControllerTrait;
+    use FindEntityControllerTrait;
+    use DocumentControllerTrait;
+    use EventControllerTrait;
 
     /**
      * GET /leads/{leadId}
      *
      * @param int $leadId
      * @return JsonResponse
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
-     * @throws \Doctrine\ODM\MongoDB\Mapping\MappingException
-     * @throws \Doctrine\ODM\MongoDB\LockException
+     * @throws HttpException
+     * @throws MappingException
+     * @throws LockException
      * @throws AlreadySubmittedException
      * @throws \LogicException
      */
@@ -78,13 +78,17 @@ final class LeadsController extends FOSRestController
                 ->create($leadForm, $this->getDoctrine()->getManager());
             $offerEntity = $this->findEntity(Offer::class, $leadDocument->getOffer()['id']);
             if ($offerEntity->isNeedEmailAddressVerification()) {
-                $event = (new LeadEmailVerificationNotificationEvent)->setLeadDocument($leadDocument);
-                $this->dispatchEvent(NotificationListener::NOTIFICATION_EVENT, $event);
+                $this->dispatchEvent(
+                    NotificationListener::NOTIFICATION_EVENT,
+                    (new LeadEmailVerificationNotificationEvent)->setLeadDocument($leadDocument)
+                );
             } elseif ($offerEntity->isNeedPhoneNumberVerification()) {
-                $event = (new LeadPhoneNumberVerificationNotificationEvent)->setLeadDocument($leadDocument);
-                $this->dispatchEvent(NotificationListener::NOTIFICATION_EVENT, $event);
+                $this->dispatchEvent(
+                    NotificationListener::NOTIFICATION_EVENT,
+                    (new LeadPhoneNumberVerificationNotificationEvent)->setLeadDocument($leadDocument)
+                );
             }
-            $response = $this->getJsonResponse($leadDocument);
+            $response = $this->getJsonResponseCreated($leadDocument);
         } else {
             $response = $this->getJsonResponse($this->getFormErrorsResponse($leadForm), HttpStatus::BAD_REQUEST);
         }
@@ -109,7 +113,7 @@ final class LeadsController extends FOSRestController
         if ($leadForm->isValid()) {
             $leadEntity = $this->getDocumentRepository(LeadDocument::class)
                 ->update($leadEntity, $leadForm, $this->getDoctrine()->getManager());
-            $response = $this->getJsonResponse($leadEntity);
+            $response = $this->getJsonResponseCreated($leadEntity);
         } else {
             $response = $this->getJsonResponse($this->getFormErrorsResponse($leadForm), HttpStatus::BAD_REQUEST);
         }

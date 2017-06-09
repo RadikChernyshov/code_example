@@ -38,7 +38,8 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 final class CampaignRepository extends EntityRepository
 {
-    use RepositoryTrait, RepositoryQueryTrait;
+    use RepositoryTrait;
+    use RepositoryQueryTrait;
 
     /**
      * @param int $campaignId
@@ -77,7 +78,7 @@ final class CampaignRepository extends EntityRepository
      * @throws ORMInvalidArgumentException
      * @throws \Doctrine\ORM\EntityNotFoundException
      */
-    public function removeByUser(int $campaignId, int $userId): bool
+    public function removeCampaignsByUser(int $campaignId, int $userId): bool
     {
         $isDeleted = false;
         $campaignEntity = $this->getCampaignByUser($campaignId, $userId);
@@ -97,7 +98,7 @@ final class CampaignRepository extends EntityRepository
      * @throws ORMInvalidArgumentException
      * @throws EntityNotFoundException
      */
-    public function flushStatus(Campaign $campaignEntity, CampaignStatus $campaignStatusEntity): Campaign
+    public function flushCampaignStatus(Campaign $campaignEntity, CampaignStatus $campaignStatusEntity): Campaign
     {
         $campaignProperty = $campaignEntity->getProperty();
         if ($campaignProperty) {
@@ -112,7 +113,7 @@ final class CampaignRepository extends EntityRepository
      * @param int $activity
      * @return bool
      */
-    public function flushActivityBatch(array $campaignIds, int $activity): bool
+    public function flushCampaignActivityBatch(array $campaignIds, int $activity): bool
     {
         $result = false;
         if ((0 < count($campaignIds)) && in_array($activity, [Campaign::ACTIVE, Campaign::IN_ACTIVE], true)) {
@@ -141,10 +142,10 @@ final class CampaignRepository extends EntityRepository
     {
         $campaignEntity = new Campaign;
         $campaignEntity->setTitle($form->get('title')->getData());
-        $campaignEntity->setCreatedAt(time());
         $campaignEntity->setUser($userEntity);
         $campaignEntity->setIsDeleted(false);
-        $scheduleAttributes = $form->get('schedule_attributes')->getData();
+        $campaignEntity->setCreatedAt(time());
+        $scheduleAttributes = $form->get('schedule_attributes')->getData() ?? [];
         if (0 < count($scheduleAttributes)) {
             $campaignEntity->setIsScheduled(true);
             $campaignEntity->setScheduleAttributes($scheduleAttributes);
@@ -173,7 +174,7 @@ final class CampaignRepository extends EntityRepository
         $entityManager = $this->getEntityManager();
         $campaignEntity->setTitle($form->get('title')->getData());
         $campaignEntity->setCreatedAt(time());
-        $scheduleAttributes = $form->get('schedule_attributes')->getData();
+        $scheduleAttributes = $form->get('schedule_attributes')->getData() ?? [];
         if (0 < count($scheduleAttributes)) {
             $campaignEntity->setIsScheduled(true);
             $campaignEntity->setScheduleAttributes($scheduleAttributes);
@@ -248,7 +249,7 @@ final class CampaignRepository extends EntityRepository
      */
     public function getBaseQuery(): QueryBuilder
     {
-        return  $this->getQueryBuilder()
+        return $this->getQueryBuilder()
             ->select(['c'])
             ->from(Campaign::class, 'c')
             ->leftJoin(CampaignProperties::class, 'cp', 'WITH', 'cp.campaign_id = c.id')
@@ -287,12 +288,13 @@ final class CampaignRepository extends EntityRepository
     }
 
     /**
-     * @param QueryBuilder $query
+     * @param QueryBuilder $queryBuilder
      * @param Request $request
+     *
      * @return QueryBuilder
      * @throws \InvalidArgumentException
      */
-    private function setQueryConditions(QueryBuilder $query, Request $request): QueryBuilder
+    private function setQueryConditions(QueryBuilder $queryBuilder, Request $request): QueryBuilder
     {
         if ($this->isQueryParamExist('f_is_deleted', $request)) {
             $sortParams = $this->getQuerySortParams('f_is_deleted', $request);
@@ -300,134 +302,70 @@ final class CampaignRepository extends EntityRepository
                 $expr = $this->getQueryExpr()->orX();
                 foreach ($sortParams as $param) {
                     $expr->add(
-                        $this->getQueryExpr()->eq($this->getRootTableAlias($query) . '.is_deleted', $param)
+                        $this->getQueryExpr()->eq($this->getRootTableAlias($queryBuilder) . '.is_deleted', $param)
                     );
                 }
-                $query->andWhere($expr);
+                $queryBuilder->andWhere($expr);
             }
         }
         if ($this->isQueryParamExist('id', $request)) {
-            $query->addOrderBy($this->getRootTableAlias($query) . '.id', $this->getOrderQueryCondition('id', $request));
+            $queryBuilder->addOrderBy($this->getRootTableAlias($queryBuilder) . '.id', $this->getOrderQueryCondition('id', $request));
         }
         if ($this->isQueryParamExist('title', $request)) {
-            $query->addOrderBy(
-                $this->getRootTableAlias($query) . '.title',
+            $queryBuilder->addOrderBy(
+                $this->getRootTableAlias($queryBuilder) . '.title',
                 $this->getOrderQueryCondition('title', $request)
             );
         }
         if ($this->isQueryParamExist('created_at', $request)) {
-            $query->orderBy(
-                $this->getRootTableAlias($query) . '.created_at',
+            $queryBuilder->orderBy(
+                $this->getRootTableAlias($queryBuilder) . '.created_at',
                 $this->getOrderQueryCondition('created_at', $request)
             );
         }
         if ($this->isQueryParamExist('status', $request)) {
-            $query->addOrderBy('c.is_deleted', 'ASC');
-            $query->addOrderBy('cs.id', $this->getOrderQueryCondition('status', $request));
+            $queryBuilder->addOrderBy('c.is_deleted', 'ASC');
+            $queryBuilder->addOrderBy('cs.id', $this->getOrderQueryCondition('status', $request));
         }
         if ($this->isQueryParamExist('industry', $request)) {
-            $query->addOrderBy('ui.id', $this->getOrderQueryCondition('industry', $request));
+            $queryBuilder->addOrderBy('ui.id', $this->getOrderQueryCondition('industry', $request));
         }
         if ($this->isQueryParamExist('location', $request)) {
-            $query->addOrderBy('cln.title', $this->getOrderQueryCondition('location', $request));
+            $queryBuilder->addOrderBy('cln.title', $this->getOrderQueryCondition('location', $request));
         }
         if ($this->isQueryParamExist('language', $request)) {
-            $query->addOrderBy('clg.title', $this->getOrderQueryCondition('language', $request));
+            $queryBuilder->addOrderBy('clg.title', $this->getOrderQueryCondition('language', $request));
         }
         if ($this->isQueryParamExist('leads_amount', $request)) {
-            $query->addOrderBy('sc.leads_amount', $this->getOrderQueryCondition('leads_amount', $request));
+            $queryBuilder->addOrderBy('sc.leads_amount', $this->getOrderQueryCondition('leads_amount', $request));
         }
         if ($this->isQueryParamExist('rate', $request)) {
-            $query->addOrderBy(
+            $queryBuilder->addOrderBy(
                 'sc.rate',
                 $this->getOrderQueryCondition('rate', $request)
             );
         }
         if ($this->isQueryParamExist('budget_daily', $request)) {
-            $query->addOrderBy(
+            $queryBuilder->addOrderBy(
                 'cp.budget_daily',
                 $this->getOrderQueryCondition('budget_daily', $request)
             );
         }
         if ($this->isQueryParamExist('sale_amount', $request)) {
-            $query->orderBy('sc.sale_amount', $this->getOrderQueryCondition('sale_amount', $request));
+            $queryBuilder->orderBy('sc.sale_amount', $this->getOrderQueryCondition('sale_amount', $request));
         }
         if ($this->isQueryParamExist('money_spent', $request)) {
-            $query->addOrderBy(
+            $queryBuilder->addOrderBy(
                 'sc.money_spent',
                 $this->getOrderQueryCondition('money_spent', $request)
             );
         }
         if ($this->isQueryParamExist('money_revenue', $request)) {
-            $query->addOrderBy(
+            $queryBuilder->addOrderBy(
                 'sc.money_revenue',
                 $this->getOrderQueryCondition('money_revenue', $request)
             );
         }
-        if ($this->isQueryParamExist('f_status', $request)) {
-            $sortParams = $this->getQuerySortParams('f_status', $request);
-            if (0 < count($sortParams)) {
-                $expr = $this->getQueryExpr()->orX();
-                foreach ($sortParams as $param) {
-                    $expr->add(
-                        $this->getQueryExpr()->eq('cs.id', $param)
-                    );
-                }
-                $query->andWhere($expr);
-            }
-            $query->andWhere($this->getQueryExpr()->eq($this->getRootTableAlias($query) . '.is_deleted', 0));
-        }
-        if ($this->isQueryParamExist('f_industries', $request)) {
-            $sortParams = $this->getQuerySortParams('f_industries', $request);
-            if (0 < count($sortParams)) {
-                $expr = $this->getQueryExpr()->orX();
-                foreach ($sortParams as $param) {
-                    $expr->add(
-                        $this->getQueryExpr()->eq('ui.id', $param)
-                    );
-                }
-                $query->andWhere($expr);
-            }
-        }
-        if ($this->isQueryParamExist('f_languages', $request)) {
-            $sortParams = $this->getQuerySortParams('f_languages', $request);
-            if (0 < count($sortParams)) {
-                $expr = $this->getQueryExpr()->orX();
-                foreach ($sortParams as $param) {
-                    $expr->add(
-                        $this->getQueryExpr()->eq('clg.id', $param)
-                    );
-                }
-                $query->andWhere($expr);
-            }
-        }
-        if ($this->isQueryParamExist('f_locations', $request)) {
-            $sortParams = $this->getQuerySortParams('f_locations', $request);
-            if (0 < count($sortParams)) {
-                $expr = $this->getQueryExpr()->orX();
-                foreach ($sortParams as $param) {
-                    $expr->add(
-                        $this->getQueryExpr()->eq('cln.id', $param)
-                    );
-                }
-                $query->andWhere($expr);
-            }
-        }
-        if ($this->isQueryParamExist('s_title', $request)) {
-            $sortParams = $this->getQuerySearchParams('s_title', $request);
-            if (0 < count($sortParams)) {
-                $expr = $this->getQueryExpr()->orX();
-                foreach ($sortParams as $param) {
-                    $expr->add(
-                        $this->getQueryExpr()->like(
-                            $this->getRootTableAlias($query) . '.title',
-                            $this->getQueryExpr()->literal('%' . $param . '%')
-                        )
-                    );
-                }
-                $query->andWhere($expr);
-            }
-        }
-        return $query;
+        return $queryBuilder;
     }
 }
