@@ -58,13 +58,11 @@ RUN apt-get update && apt-get install -y nginx
 COPY ./supervisor/supervisor.conf /etc/supervisor/conf.d
 COPY ./nginx/nginx.conf /etc/nginx
 COPY ./nginx/vhosts/virtual_host.conf /etc/nginx/conf.d
-COPY ./nginx/vhosts/staff-virtual_host.conf /etc/nginx/conf.d
-
+COPY ./nginx/vhosts/staff_virtual_host.conf /etc/nginx/conf.d
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
 
-RUN git clone https://web_app.git /clone
-
-RUN cp -r /clone/sources/* /app
+RUN cd /tmp || git clone https://web_app.git clone
+RUN cp -r /tmp/clone/sources/* /app
 
 RUN rm -rf /tmp/*
 
