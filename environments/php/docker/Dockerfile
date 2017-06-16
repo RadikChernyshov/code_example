@@ -3,6 +3,7 @@ FROM php:7.1.0-fpm
 MAINTAINER Radik Chernyshov <radik.chernyshov@gmail.com>
 
 ENV PHANTOM_JS "phantomjs-2.1.1-linux-x86_64"
+ENV COMPOSER "1.4.1"
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
@@ -47,28 +48,37 @@ RUN buildDeps="libpq-dev libzip-dev " && apt-get update && \
 RUN pecl install mongodb && \
     echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongodb.ini
 
-RUN mkdir -p -m 0777 /app/web/uploads
-
 RUN wget -O - http://nginx.org/keys/nginx_signing.key | sudo apt-key add -
 RUN sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
 RUN echo "deb http://nginx.org/packages/mainline/ubuntu/ trusty nginx" | sudo tee -a /etc/apt/sources.list
 RUN echo "deb-src http://nginx.org/packages/mainline/ubuntu/ trusty nginx" | sudo tee -a /etc/apt/sources.list
 RUN apt-get update && apt-get install -y nginx
 
-COPY ./supervisor/supervisor.conf /etc/supervisor/conf.d
-COPY ./nginx/nginx.conf /etc/nginx
-COPY ./nginx/vhosts/virtual_host.conf /etc/nginx/conf.d
-COPY ./nginx/vhosts/staff_virtual_host.conf /etc/nginx/conf.d
+RUN wget https://bitbucket.org/ariya/phantomjs/downloads/${PHANTOM_JS}.tar.bz2 && \
+    mv ${PHANTOM_JS}.tar.bz2 /usr/local/share/ && \
+    cd /usr/local/share/ && \
+    tar xvjf $PHANTOM_JS.tar.bz2 && \
+    ln -sf /usr/local/share/${PHANTOM_JS}/bin/phantomjs /usr/local/share/phantomjs && \
+    ln -sf /usr/local/share/${PHANTOM_JS}/bin/phantomjs /usr/local/bin/phantomjs && \
+    ln -sf /usr/local/share/${PHANTOM_JS}/bin/phantomjs /usr/bin/phantomjs && \
+    rm -fr $PHANTOM_JS.tar.bz2 && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY supervisor/supervisor.conf /etc/supervisor/conf.d
+COPY nginx/nginx.conf /etc/nginx
+COPY nginx/vhosts/virtual_host.conf /etc/nginx/conf.d
+COPY nginx/vhosts/staff_virtual_host.conf /etc/nginx/conf.d
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
 
 RUN cd /tmp && git clone https://web_app.git clone
 RUN cp -r /tmp/clone/sources/* /app
+RUN mkdir -p -m 0777 /app/web/uploads
 
 RUN rm -rf /tmp/*
 
 WORKDIR /app
 
-RUN wget https://getcomposer.org/download/1.4.1/composer.phar
+RUN wget https://getcomposer.org/download/${COMPOSER}/composer.phar
 RUN php composer.phar install --ignore-platform-reqs --no-dev
 
 EXPOSE 80
