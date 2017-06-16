@@ -2,8 +2,8 @@ FROM php:7.1.0-fpm
 
 MAINTAINER Radik Chernyshov <radik.chernyshov@gmail.com>
 
-ENV PHANTOM_JS "phantomjs-2.1.1-linux-x86_64"
-ENV COMPOSER "1.4.1"
+ENV PHANTOM_JS_VERSION "phantomjs-2.1.1-linux-x86_64"
+ENV COMPOSER_VERSION "1.4.1"
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
@@ -54,14 +54,14 @@ RUN echo "deb http://nginx.org/packages/mainline/ubuntu/ trusty nginx" | sudo te
 RUN echo "deb-src http://nginx.org/packages/mainline/ubuntu/ trusty nginx" | sudo tee -a /etc/apt/sources.list
 RUN apt-get update && apt-get install -y nginx
 
-RUN wget https://bitbucket.org/ariya/phantomjs/downloads/${PHANTOM_JS}.tar.bz2 && \
-    mv ${PHANTOM_JS}.tar.bz2 /usr/local/share/ && \
+RUN wget https://bitbucket.org/ariya/phantomjs/downloads/${PHANTOM_JS_VERSION}.tar.bz2 && \
+    mv ${PHANTOM_JS_VERSION}.tar.bz2 /usr/local/share/ && \
     cd /usr/local/share/ && \
-    tar xvjf $PHANTOM_JS.tar.bz2 && \
-    ln -sf /usr/local/share/${PHANTOM_JS}/bin/phantomjs /usr/local/share/phantomjs && \
-    ln -sf /usr/local/share/${PHANTOM_JS}/bin/phantomjs /usr/local/bin/phantomjs && \
-    ln -sf /usr/local/share/${PHANTOM_JS}/bin/phantomjs /usr/bin/phantomjs && \
-    rm -fr $PHANTOM_JS.tar.bz2 && \
+    tar xvjf $PHANTOM_JS_VERSION.tar.bz2 && \
+    ln -sf /usr/local/share/${PHANTOM_JS_VERSION}/bin/phantomjs /usr/local/share/phantomjs && \
+    ln -sf /usr/local/share/${PHANTOM_JS_VERSION}/bin/phantomjs /usr/local/bin/phantomjs && \
+    ln -sf /usr/local/share/${PHANTOM_JS_VERSION}/bin/phantomjs /usr/bin/phantomjs && \
+    rm -fr $PHANTOM_JS_VERSION.tar.bz2 && \
     rm -rf /var/lib/apt/lists/*
 
 COPY supervisor/supervisor.conf /etc/supervisor/conf.d
@@ -78,7 +78,7 @@ RUN rm -rf /tmp/*
 
 WORKDIR /app
 
-RUN wget https://getcomposer.org/download/${COMPOSER}/composer.phar
+RUN wget https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar
 RUN php composer.phar install --ignore-platform-reqs --no-dev
 
 EXPOSE 80
