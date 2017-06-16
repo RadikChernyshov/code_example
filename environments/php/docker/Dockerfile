@@ -78,7 +78,7 @@ RUN rm -rf /tmp/*
 
 WORKDIR /app
 
-RUN wget https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar
-RUN php composer.phar install --ignore-platform-reqs --no-dev
+RUN wget https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar && \
+        php composer.phar install --ignore-platform-reqs --no-dev
 
 EXPOSE 80
