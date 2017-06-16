@@ -1,0 +1,38 @@
+version: "2"
+services:
+  proxy:
+   image: jwilder/nginx-proxy
+   ports:
+     - 80:80
+   links:
+     - web-static
+     - web-api
+   restart: always
+   volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+   networks:
+     - front-tier
+     - back-tier
+  web-static:
+   build: ./web
+   volumes:
+     - ./../../../sources:/app
+   restart: always
+   environment:
+    - VIRTUAL_HOST=static.com
+   networks:
+    - back-tier
+  web-api:
+   build: ./web-api
+   volumes:
+     - ./../../../sources:/app
+   restart: always
+   environment:
+    - VIRTUAL_HOST=api.com
+   networks:
+    - back-tier
+networks:
+  front-tier:
+    driver: bridge
+  back-tier:
+    driver: bridge

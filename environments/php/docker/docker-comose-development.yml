@@ -1,0 +1,47 @@
+version: "2"
+services:
+  nginx:
+    image: bitnami/nginx:1.9.15-1
+    container_name: nginx
+    volumes:
+      - nginx/vhosts:/bitnami/nginx/conf/vhosts
+      - ../../sources:/app
+      - ../../lp:/app/lp
+    ports:
+      - 80:80
+    networks:
+      - frontend
+      - backend
+  phpfpm:
+    build: ./phpfpm
+    container_name: phpfpm
+    volumes:
+      - ./../../sources:/app
+    networks:
+      - backend
+  redis:
+    image: redis:3.2.0
+    container_name: redis
+    networks:
+      - backend
+  mysql-root:
+    image: mysql:5.7
+    container_name: mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_PASSWORD: "password"
+      MYSQL_USER: "user"
+      MYSQL_DATABASE: "db"
+      MYSQL_ROOT_PASSWORD: "root_password"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_RANDOM_ROOT_PASSWORD: "no"
+    networks:
+      - backend
+  mongo:
+    image: bitnami/mongodb
+    container_name: mongo
+    ports:
+      - 27017:27017
+    networks:
+      - -backend
