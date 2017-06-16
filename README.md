@@ -122,7 +122,7 @@
 
 # Docker & Compose Examples
 
-#### [Development Environments](https://github.com/RadikChernyshov/code_example/tree/master/php5.6.*/SocialUsersDataComponent)
+#### [Development Environments](https://github.com/RadikChernyshov/code_example/tree/master/environments/php/docker)
 
 ```
 └── php
