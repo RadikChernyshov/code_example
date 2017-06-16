@@ -2,8 +2,8 @@
 
 var _ = require('underscore');
 
-function _connectionFromPool($pool, fn, callback) {
-   $pool.getConnection(function(err, connection) {
+function _connectionFromPool(connectionPool, fn, callback) {
+   connectionPool.getConnection(function(err, connection) {
       if (err) {
          return callback(err);
       }
@@ -81,9 +81,9 @@ function generateBetweenClause(value) {
 }
 
 function generateWhereClauseFromFieldList(fieldList) {
-   if (fieldList.length === 0) {
-      return '';
-   }
+   if (0 === fieldList.length) {
+     return '';
+  }
    var clause = ' WHERE ';
    for (var i = 0; i < fieldList.length - 1; i++) {
       var field = fieldList[i];
