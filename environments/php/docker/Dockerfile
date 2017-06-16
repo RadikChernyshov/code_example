@@ -48,10 +48,10 @@ RUN buildDeps="libpq-dev libzip-dev " && apt-get update && \
 RUN pecl install mongodb && \
         echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongodb.ini
 
-RUN wget -O - http://nginx.org/keys/nginx_signing.key | sudo apt-key add -
-RUN sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
-RUN echo "deb http://nginx.org/packages/mainline/ubuntu/ trusty nginx" | sudo tee -a /etc/apt/sources.list
-RUN echo "deb-src http://nginx.org/packages/mainline/ubuntu/ trusty nginx" | sudo tee -a /etc/apt/sources.list
+RUN wget -O - http://nginx.org/keys/nginx_signing.key | apt-key add -
+RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak
+RUN echo "deb http://nginx.org/packages/mainline/ubuntu/ trusty nginx" | tee -a /etc/apt/sources.list
+RUN echo "deb-src http://nginx.org/packages/mainline/ubuntu/ trusty nginx" | tee -a /etc/apt/sources.list
 RUN apt-get update && apt-get install -y nginx
 
 RUN wget https://bitbucket.org/ariya/phantomjs/downloads/${PHANTOM_JS_VERSION}.tar.bz2 && \
