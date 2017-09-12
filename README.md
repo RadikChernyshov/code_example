@@ -120,6 +120,37 @@
 └── controller.js
 ```
 
+### [JS React ECMAScript6](https://github.com/RadikChernyshov/code_example/tree/master/nodejs/ecmascript6)
+
+```
+└── react-test-app
+    ├── README.md
+    ├── package-lock.json
+    ├── package.json
+    ├── public
+    │   ├── favicon.ico
+    │   └── index.html
+    └── src
+        ├── actions
+        │   └── PersonsActions.js
+        ├── constants.js
+        ├── containers
+        │   ├── app
+        │   │   └── index.js
+        │   ├── details
+        │   │   └── index.js
+        │   ├── favorites
+        │   │   └── index.js
+        │   └── home
+        │       └── index.js
+        ├── index.css
+        ├── index.js
+        ├── modules
+        │   ├── index.js
+        │   └── personsReducer.js
+        └── store.js
+```
+
 # Docker & Compose Examples
 
 #### [Development Environments](https://github.com/RadikChernyshov/code_example/tree/master/environments/php/docker)
