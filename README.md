@@ -120,7 +120,7 @@
 └── controller.js
 ```
 
-### [JS React ECMAScript6](https://github.com/RadikChernyshov/code_example/tree/master/nodejs/ecmascript6)
+### [JS React ECMAScript6](https://github.com/RadikChernyshov/code_example/tree/master/js/react/react-test-app)
 
 ```
 └── react-test-app
